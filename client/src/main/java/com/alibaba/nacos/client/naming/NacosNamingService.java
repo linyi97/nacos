@@ -158,6 +158,7 @@ public class NacosNamingService implements NamingService {
     public void registerInstance(String serviceName, String groupName, Instance instance) throws NacosException {
         NamingUtils.checkInstanceIsLegal(instance);
         checkAndStripGroupNamePrefix(instance, groupName);
+        //基于初始化得到的RPC客户端发起服务注册请求
         clientProxy.registerService(serviceName, groupName, instance);
     }
     

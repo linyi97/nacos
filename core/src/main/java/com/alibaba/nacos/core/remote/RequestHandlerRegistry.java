@@ -71,9 +71,13 @@ public class RequestHandlerRegistry implements ApplicationListener<ContextRefres
         }
         return true;
     }
-    
+    /**Add commentMore actions
+     * 基于扩展点遍历所有的 RequestHandler 包括注册实例的方法包括 instanceRequestHandler
+     * @param event
+     */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        //获取所有的RequestHandler
         Map<String, RequestHandler> beansOfType = event.getApplicationContext().getBeansOfType(RequestHandler.class);
         Collection<RequestHandler> values = beansOfType.values();
         for (RequestHandler requestHandler : values) {
@@ -116,7 +120,7 @@ public class RequestHandlerRegistry implements ApplicationListener<ContextRefres
             } catch (Exception e) {
                 //ignore.
             }
-            
+            //将rpc对应的请求处理器直接丢到registryHandlers这个map中
             registryHandlers.putIfAbsent(tClass.getSimpleName(), requestHandler);
         }
     }

@@ -87,6 +87,7 @@ public abstract class BaseGrpcServer extends BaseRpcServer {
     @Override
     public void startServer() throws Exception {
         final MutableHandlerRegistry handlerRegistry = new MutableHandlerRegistry();
+        //handlerRegistry 记录注册服务的容器
         addServices(handlerRegistry, getSeverInterceptors().toArray(new ServerInterceptor[0]));
         NettyServerBuilder builder = NettyServerBuilder.forPort(getServicePort()).executor(getRpcExecutor());
         
@@ -100,13 +101,14 @@ public abstract class BaseGrpcServer extends BaseRpcServer {
         for (ServerTransportFilter each : getServerTransportFilters()) {
             builder.addTransportFilter(each);
         }
+        //构建rpcserver
         server = builder.maxInboundMessageSize(getMaxInboundMessageSize()).fallbackHandlerRegistry(handlerRegistry)
                 .compressorRegistry(CompressorRegistry.getDefaultInstance())
                 .decompressorRegistry(DecompressorRegistry.getDefaultInstance())
                 .keepAliveTime(getKeepAliveTime(), TimeUnit.MILLISECONDS)
                 .keepAliveTimeout(getKeepAliveTimeout(), TimeUnit.MILLISECONDS)
                 .permitKeepAliveTime(getPermitKeepAliveTime(), TimeUnit.MILLISECONDS).build();
-        
+        //启动rpcserver
         server.start();
     }
     
@@ -207,7 +209,7 @@ public abstract class BaseGrpcServer extends BaseRpcServer {
                                 GrpcServerConstants.REQUEST_METHOD_NAME))
                 .setRequestMarshaller(ProtoUtils.marshaller(Payload.getDefaultInstance()))
                 .setResponseMarshaller(ProtoUtils.marshaller(Payload.getDefaultInstance())).build();
-        
+        //创建一个处理异步RPC调用的ServerCallHandler。当客户端发起一个请求时，grpcCommonRequestAcceptor.request方法会被调用
         final ServerCallHandler<Payload, Payload> payloadHandler = ServerCalls.asyncUnaryCall(
                 (request, responseObserver) -> {
                     handleCommonRequest(request, responseObserver);
@@ -230,6 +232,7 @@ public abstract class BaseGrpcServer extends BaseRpcServer {
         
         final ServerServiceDefinition serviceDefOfBiStream = ServerServiceDefinition.builder(
                 GrpcServerConstants.REQUEST_BI_STREAM_SERVICE_NAME).addMethod(biStreamMethod, biStreamHandler).build();
+        //将处理器存入缓存中
         handlerRegistry.addService(ServerInterceptors.intercept(serviceDefOfBiStream, serverInterceptor));
         
     }

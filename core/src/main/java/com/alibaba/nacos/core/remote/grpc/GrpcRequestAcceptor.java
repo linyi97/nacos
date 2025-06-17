@@ -81,6 +81,7 @@ public class GrpcRequestAcceptor extends RequestGrpc.RequestImplBase {
     public void request(Payload grpcRequest, StreamObserver<Payload> responseObserver) {
         
         traceIfNecessary(grpcRequest, true);
+        //需要使用的服务器类型，例如服务注册就是 InstanceRequest
         String type = grpcRequest.getMetadata().getType();
         long startTime = System.nanoTime();
         
@@ -107,7 +108,7 @@ public class GrpcRequestAcceptor extends RequestGrpc.RequestImplBase {
                     0, null, null, System.nanoTime() - startTime);
             return;
         }
-        
+        //基于type以策略模式的姿态到找到对应的请求处理器
         RequestHandler requestHandler = requestHandlerRegistry.getByRequestType(type);
         //no handler found.
         if (requestHandler == null) {
@@ -192,6 +193,7 @@ public class GrpcRequestAcceptor extends RequestGrpc.RequestImplBase {
             requestMeta.setAbilityTable(connection.getAbilityTable());
             connectionManager.refreshActiveTime(requestMeta.getConnectionId());
             prepareRequestContext(request, requestMeta, connection);
+            //解析参数并处理该请求
             Response response = requestHandler.handleRequest(request, requestMeta);
             Payload payloadResponse = GrpcUtils.convert(response);
             traceIfNecessary(payloadResponse, false);

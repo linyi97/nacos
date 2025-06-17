@@ -261,8 +261,10 @@ public class NamingGrpcClientProxy extends AbstractNamingClientProxy {
      */
     public void doRegisterServiceForPersistent(String serviceName, String groupName, Instance instance)
             throws NacosException {
+        //基于服务名称、组名、实例信息生成入参
         PersistentInstanceRequest request = new PersistentInstanceRequest(namespaceId, serviceName, groupName,
                 NamingRemoteConstants.REGISTER_INSTANCE, instance);
+        //调用requestToServer发起RPC调用
         requestToServer(request, Response.class);
     }
     
