@@ -164,12 +164,15 @@ public class NamingClientProxyDelegate implements NamingClientProxy {
     public ServiceInfo subscribe(String serviceName, String groupName, String clusters) throws NacosException {
         NAMING_LOGGER.info("[SUBSCRIBE-SERVICE] service:{}, group:{}, clusters:{} ", serviceName, groupName, clusters);
         String serviceNameWithGroup = NamingUtils.getGroupedName(serviceName, groupName);
+        //查看缓存中是否存在订阅的服务实例
         String serviceKey = ServiceInfo.getKey(serviceNameWithGroup, clusters);
         serviceInfoUpdateService.scheduleUpdateIfAbsent(serviceName, groupName, clusters);
         ServiceInfo result = serviceInfoHolder.getServiceInfoMap().get(serviceKey);
+        //如果不存在或者未订阅则发起RPC请求
         if (null == result || !isSubscribed(serviceName, groupName, clusters)) {
             result = grpcClientProxy.subscribe(serviceName, groupName, clusters);
         }
+        //将查询或者请求结果缓存到本地serviceInfoMap中
         serviceInfoHolder.processServiceInfo(result);
         return result;
     }

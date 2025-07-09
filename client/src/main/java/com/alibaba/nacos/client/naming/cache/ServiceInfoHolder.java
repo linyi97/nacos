@@ -119,6 +119,7 @@ public class ServiceInfoHolder implements Closeable {
      * @return service info
      */
     public ServiceInfo processServiceInfo(ServiceInfo serviceInfo) {
+        //获取原有服务信息
         String serviceKey = serviceInfo.getKey();
         if (serviceKey == null) {
             NAMING_LOGGER.warn("process service info but serviceKey is null, service host: {}",
@@ -132,7 +133,9 @@ public class ServiceInfoHolder implements Closeable {
                     + "pushEmptyProtection: {}, hosts: {}", serviceKey, pushEmptyProtection, serviceInfo.getHosts());
             return oldService;
         }
+        //以服务名作为key，实例信息作为value写入缓存
         serviceInfoMap.put(serviceInfo.getKey(), serviceInfo);
+        //比对实例，如果不一致则说明服务发生变化
         InstancesDiff diff = getServiceInfoDiff(oldService, serviceInfo);
         if (StringUtils.isBlank(serviceInfo.getJsonFromServer())) {
             serviceInfo.setJsonFromServer(JacksonUtils.toJson(serviceInfo));
@@ -147,6 +150,7 @@ public class ServiceInfoHolder implements Closeable {
                         new InstancesChangeEvent(notifierEventScope, serviceInfo.getName(), serviceInfo.getGroupName(),
                                 serviceInfo.getClusters(), serviceInfo.getHosts(), diff));
             }
+            //如果发生变化则基于零拷贝刷盘技术将订阅的服务信息写入本地
             DiskCache.write(serviceInfo, cacheDir);
         }
         return serviceInfo;
