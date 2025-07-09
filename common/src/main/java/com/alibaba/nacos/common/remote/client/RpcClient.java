@@ -819,10 +819,12 @@ public abstract class RpcClient implements Closeable {
         LoggerUtils.printIfInfoEnabled(LOGGER, "[{}] Receive server push request, request = {}, requestId = {}",
                 rpcClientConfig.name(), request.getClass().getSimpleName(), request.getRequestId());
         lastActiveTimeStamp = System.currentTimeMillis();
+        //遍历所有的服务端请求处理器
         for (ServerRequestHandler serverRequestHandler : serverRequestHandlers) {
             try {
+                //交给该处理器看看能否处理，若能处理则返回值非空
                 Response response = serverRequestHandler.requestReply(request, currentConnection);
-                
+                //若非空说明处理完成，直接返回结果
                 if (response != null) {
                     LoggerUtils.printIfInfoEnabled(LOGGER, "[{}] Ack server push request, request = {}, requestId = {}",
                             rpcClientConfig.name(), request.getClass().getSimpleName(), request.getRequestId());

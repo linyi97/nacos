@@ -153,7 +153,9 @@ public class NamingEventPublisher extends Thread implements ShardedEventPublishe
     private void handleEvents() {
         while (!shutdown) {
             try {
+                //取出上述的任务
                 final Event event = queue.take();
+                //处理发布的事件
                 handleEvent(event);
             } catch (InterruptedException e) {
                 Loggers.EVT_LOG.warn("Naming Event Publisher {} take event from queue failed:", this.publisherName, e);

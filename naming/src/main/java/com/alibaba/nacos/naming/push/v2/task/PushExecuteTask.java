@@ -59,6 +59,7 @@ public class PushExecuteTask extends AbstractExecuteTask {
             PushDataWrapper wrapper = generatePushData();
             ClientManager clientManager = delayTaskEngine.getClientManager();
             for (String each : getTargetClientIds()) {
+                //逐个遍历客户端，然后事件推送
                 Client client = clientManager.getClient(each);
                 if (null == client) {
                     // means this client has disconnect
@@ -69,6 +70,7 @@ public class PushExecuteTask extends AbstractExecuteTask {
                 if (subscriber == null) {
                     continue;
                 }
+                //通过RPC接口推送服务下线通知
                 delayTaskEngine.getPushExecutor().doPushWithCallback(each, subscriber, wrapper,
                         new ServicePushCallback(each, subscriber, wrapper.getOriginalData(), delayTask.isPushToAll()));
             }

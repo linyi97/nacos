@@ -121,11 +121,13 @@ public class ServiceInfoHolder implements Closeable {
     public ServiceInfo processServiceInfo(ServiceInfo serviceInfo) {
         //获取原有服务信息
         String serviceKey = serviceInfo.getKey();
+        //若为空直接返回
         if (serviceKey == null) {
             NAMING_LOGGER.warn("process service info but serviceKey is null, service host: {}",
                     JacksonUtils.toJson(serviceInfo.getHosts()));
             return null;
         }
+        //取出缓存中原有缓存信息
         ServiceInfo oldService = serviceInfoMap.get(serviceInfo.getKey());
         if (isEmptyOrErrorPush(serviceInfo)) {
             //empty or error push, just ignore
@@ -141,6 +143,7 @@ public class ServiceInfoHolder implements Closeable {
             serviceInfo.setJsonFromServer(JacksonUtils.toJson(serviceInfo));
         }
         MetricsMonitor.getServiceInfoMapSizeMonitor().set(serviceInfoMap.size());
+        //如果缓存发生变化，则发布一个实例更新的事件InstancesChangeEvent，并将更新结果采用零拷贝的方式持久化到磁盘中
         if (diff.hasDifferent()) {
             NAMING_LOGGER.info("current ips:({}) service: {} -> {}", serviceInfo.ipCount(), serviceInfo.getKey(),
                     JacksonUtils.toJson(serviceInfo.getHosts()));

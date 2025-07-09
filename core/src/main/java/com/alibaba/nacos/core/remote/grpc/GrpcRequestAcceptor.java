@@ -184,6 +184,7 @@ public class GrpcRequestAcceptor extends RequestGrpc.RequestImplBase {
         
         Request request = (Request) parseObj;
         try {
+            //组装连接信息
             Connection connection = connectionManager.getConnection(GrpcServerConstants.CONTEXT_KEY_CONN_ID.get());
             RequestMeta requestMeta = new RequestMeta();
             requestMeta.setClientIp(connection.getMetaInfo().getClientIp());
@@ -193,7 +194,7 @@ public class GrpcRequestAcceptor extends RequestGrpc.RequestImplBase {
             requestMeta.setAbilityTable(connection.getAbilityTable());
             connectionManager.refreshActiveTime(requestMeta.getConnectionId());
             prepareRequestContext(request, requestMeta, connection);
-            //解析参数并处理该请求
+            //解析参数并处理该请求，实际处理rpc请求的方法
             Response response = requestHandler.handleRequest(request, requestMeta);
             Payload payloadResponse = GrpcUtils.convert(response);
             traceIfNecessary(payloadResponse, false);

@@ -92,6 +92,7 @@ public class ClientServiceIndexesManager extends SmartSubscriber {
         if (event instanceof ClientOperationEvent.ClientReleaseEvent) {
             handleClientDisconnect((ClientOperationEvent.ClientReleaseEvent) event);
         } else if (event instanceof ClientOperationEvent) {
+            //处理服务注册或者下线后的事件
             handleClientOperation((ClientOperationEvent) event);
         }
     }
@@ -117,6 +118,7 @@ public class ClientServiceIndexesManager extends SmartSubscriber {
         Service service = event.getService();
         String clientId = event.getClientId();
         if (event instanceof ClientOperationEvent.ClientRegisterServiceEvent) {
+            //处理服务注册事件，实际上就是发布一个ServiceChangedEvent事件
             addPublisherIndexes(service, clientId);
         } else if (event instanceof ClientOperationEvent.ClientDeregisterServiceEvent) {
             removePublisherIndexes(service, clientId);
